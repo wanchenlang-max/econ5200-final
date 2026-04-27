@@ -19,9 +19,9 @@ We use the Survey of Income and Program Participation (SIPP), a nationally repre
 
 | Variable | Description | Type |
 |----------|-------------|------|
-| `net_tfa` | Net total financial assets ($) | Outcome |
+| `net_tfa` | Net total financial assets (USD) | Outcome |
 | `e401` | 401(k) plan eligibility | Treatment (binary) |
-| `inc` | Annual family income ($) | Confounder |
+| `inc` | Annual family income (USD) | Confounder |
 | `age` | Age in years | Confounder |
 | `fsize` | Family size | Confounder |
 | `educ` | Years of education | Confounder |
