@@ -1,7 +1,7 @@
 # Technical Report: Does 401(k) Eligibility Causally Increase Household Savings?
 
 **ECON 5200: Causal Machine Learning & Applied Analytics**  
-**Julian Lechner | Spring 2026**
+**Wanchen Lang | Spring 2026**
 
 ---
 

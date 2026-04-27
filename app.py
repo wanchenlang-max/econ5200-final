@@ -173,4 +173,4 @@ st.info(
 )
 
 st.caption("Data: SIPP via DoubleML | Method: Partially Linear Regression DML | "
-           "Chernozhukov et al. (2018) | ECON 5200 Final Project — Julian Lechner")
+           "Chernozhukov et al. (2018) | ECON 5200 Final Project — Wanchen Lang")
