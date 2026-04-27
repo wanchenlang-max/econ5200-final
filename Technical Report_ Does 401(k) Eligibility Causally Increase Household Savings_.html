@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Technical Report: Does 401(k) Eligibility Causally Increase Household Savings?</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Technical Report: Does 401(k) Eligibility Causally
+Increase Household Savings?</h1>
+</header>
+<h1
+id="technical-report-does-401k-eligibility-causally-increase-household-savings">Technical
+Report: Does 401(k) Eligibility Causally Increase Household
+Savings?</h1>
+<p><strong>ECON 5200: Causal Machine Learning &amp; Applied
+Analytics</strong><br />
+<strong>Wanchen Lang | Spring 2026</strong></p>
+<hr />
+<h2 id="research-question">1. Research Question</h2>
+<p>Does eligibility for an employer-sponsored 401(k) retirement savings
+plan causally increase net household financial assets? This question is
+policy-relevant for financial services firms, policymakers evaluating
+SECURE 2.0 provisions, and employers deciding whether to extend benefit
+coverage to part-time and seasonal workers. The answer cannot be
+obtained from a predictive model alone — it requires a credible causal
+identification strategy, for reasons developed in Section 4.</p>
+<hr />
+<h2 id="data">2. Data</h2>
+<p>We use the Survey of Income and Program Participation (SIPP), a
+nationally representative household survey, accessed via the
+<code>doubleml</code> Python package (Chernozhukov et al., 2018; Abadie,
+2003). The dataset contains <strong>9,915 household
+observations</strong>.</p>
+<p><strong>Key variables:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net_tfa</code></td>
+<td>Net total financial assets (USD)</td>
+<td>Outcome</td>
+</tr>
+<tr>
+<td><code>e401</code></td>
+<td>401(k) plan eligibility</td>
+<td>Treatment (binary)</td>
+</tr>
+<tr>
+<td><code>inc</code></td>
+<td>Annual family income (USD)</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>age</code></td>
+<td>Age in years</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>fsize</code></td>
+<td>Family size</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>educ</code></td>
+<td>Years of education</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>marr</code></td>
+<td>Married (0/1)</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>twoearn</code></td>
+<td>Two-earner household (0/1)</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>pira</code></td>
+<td>IRA participation (0/1)</td>
+<td>Confounder</td>
+</tr>
+<tr>
+<td><code>hown</code></td>
+<td>Homeowner (0/1)</td>
+<td>Confounder</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Descriptive statistics:</strong> Net total financial assets
+(<code>net_tfa</code>) have a mean of $18,052 and a median of $1,499,
+reflecting a heavily right-skewed distribution. Approximately 39% of
+households in the sample are eligible for a 401(k) plan.</p>
+<p><strong>Balance check:</strong> A pre-treatment comparison reveals
+substantial differences between eligible and ineligible households.
+Eligible households earn $46,862 annually on average versus $31,494 for
+ineligible households — a gap of $15,368. They are also more likely to
+hold IRAs and own homes. This imbalance is the core motivation for a
+causal approach: naively comparing eligible to ineligible households
+will conflate the effect of plan access with the effect of being a
+higher-income worker at a better employer.</p>
+<hr />
+<h2 id="identification-strategy">3. Identification Strategy</h2>
+<p><strong>Strategy:</strong> Double Machine Learning (DML) — Partially
+Linear Regression (PLR) specification.</p>
+<p><strong>Identifying assumption:</strong> Conditional independence.
+After controlling for income, age, education, family size, marital
+status, IRA participation, and homeownership, the assignment of 401(k)
+eligibility — which is determined at the employer level — is
+uncorrelated with unobserved savings preferences.</p>
+<p><strong>Intuition:</strong> Two workers with identical income, age,
+education, and family structure may work at different employers, one of
+which happens to offer a 401(k) plan. Conditional on all observable
+characteristics, the variation in eligibility comes from employer-level
+plan decisions that are plausibly unrelated to any individual worker’s
+savings preferences. This is the identifying variation we exploit.</p>
+<p><strong>Why not an experiment?</strong> 401(k) eligibility cannot be
+randomly assigned in observational data — it is a firm-level policy
+decision correlated with employer quality. This creates the confounding
+described above, which DML is designed to address.</p>
+<hr />
+<h2
+id="prediction-vs.-causation-why-a-predictive-model-is-insufficient">4.
+Prediction vs. Causation: Why a Predictive Model Is Insufficient</h2>
+<p>A natural first instinct is to train a machine learning model — say,
+a Random Forest — to predict <code>net_tfa</code> from all available
+features including <code>e401</code>. This produces a prediction R² of
+0.137, meaning the model explains about 14% of variance in net financial
+assets. The model would assign non-trivial feature importance to
+<code>e401</code>.</p>
+<p><strong>But this does not answer the causal question.</strong> Here
+is why:</p>
+<ol type="1">
+<li><p><strong>The predictive model answers:</strong> “Given that I
+observe a worker who is eligible for a 401(k), what would I predict
+their savings to be?” This is a description of the world as it
+is.</p></li>
+<li><p><strong>The causal question asks:</strong> “If I make this worker
+eligible for a 401(k) — changing their status from 0 to 1 — what happens
+to their savings?” This is a counterfactual about intervening in the
+world.</p></li>
+</ol>
+<p>These are fundamentally different questions. The Random Forest’s
+feature importance for <code>e401</code> reflects the
+<em>correlation</em> between eligibility and savings, which includes
+both the causal effect <em>and</em> the income selection effect. A
+worker’s employer type (which determines eligibility) is correlated with
+their income, financial literacy, and savings preferences — all of which
+independently increase <code>net_tfa</code>. A predictive model cannot
+untangle these channels.</p>
+<p><strong>Concretely:</strong> the predictive association between
+<code>e401</code> and <code>net_tfa</code> is approximately $19,559 (the
+naive OLS estimate). The causal effect, after removing income
+confounding, is $9,581. A policy decision based on the predictive figure
+would overstate the expected impact of extending eligibility by
+approximately $10,000 per household — a 52% overstatement. At scale
+(50,000 workers, 30% participation), this translates to a $74M error in
+projected aggregate savings impact.</p>
+<p>The fundamental problem is that the predictive model’s job is to
+minimize prediction error on observed data, not to simulate the outcome
+of an intervention. These objectives diverge whenever the treatment
+variable is correlated with unobserved determinants of the outcome —
+which is almost always true in observational settings.</p>
+<hr />
+<h2 id="methodology-double-machine-learning">5. Methodology: Double
+Machine Learning</h2>
+<p>We implement the Partially Linear Regression (PLR) variant of Double
+Machine Learning (Chernozhukov et al., 2018). The model is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mo>=</mo><mi>θ</mi><mo>⋅</mo><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">Y_i = \theta \cdot T_i + g(W_i) + \varepsilon_i</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">Y_i</annotation></semantics></math>
+is net financial assets,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mi>i</mi></msub><annotation encoding="application/x-tex">T_i</annotation></semantics></math>
+is 401(k) eligibility,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math>
+is the vector of eight confounders,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>⋅</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">g(\cdot)</annotation></semantics></math>
+is an unknown function approximated by machine learning, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+is the causal average treatment effect we wish to estimate.</p>
+<p><strong>Estimation procedure (cross-fitting):</strong></p>
+<ol type="1">
+<li>Split data into 5 folds. For each fold, train nuisance models on the
+remaining 4 folds.</li>
+<li><strong>Outcome nuisance:</strong> Predict
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>
+using a Gradient Boosted Machine (GBM) with 100 trees, depth 3, learning
+rate 0.05. Compute residuals
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>Y</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>−</mo><mover><mi>E</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\tilde{Y}_i = Y_i - \hat{E}[Y_i | W_i]</annotation></semantics></math>.</li>
+<li><strong>Treatment nuisance:</strong> Predict
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>
+using the same GBM specification. Compute residuals
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>T</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mi>T</mi><mi>i</mi></msub><mo>−</mo><mover><mi>E</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">[</mo><msub><mi>T</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\tilde{T}_i = T_i - \hat{E}[T_i | W_i]</annotation></semantics></math>.</li>
+<li><strong>Final stage:</strong> Regress
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>Y</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{Y}</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>T</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{T}</annotation></semantics></math>
+via OLS. The coefficient is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\theta}</annotation></semantics></math>,
+the causal ATE.</li>
+</ol>
+<p><strong>Why cross-fitting?</strong> Using the same data to fit the
+nuisance models and estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+introduces regularization bias — machine learning models overfit to
+their training data, and this overfitting corrupts inference on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>.
+Cross-fitting (Neyman orthogonalization) eliminates this bias, ensuring
+valid confidence intervals even when the nuisance models are
+high-dimensional approximations.</p>
+<p><strong>Why GBM for nuisance models?</strong> The relationship
+between income and savings is highly nonlinear (savings accelerate
+sharply at higher income levels), and GBMs capture this nonlinearity
+better than linear regression. This produces cleaner residuals
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>Y</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{Y}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>T</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{T}</annotation></semantics></math>,
+which in turn produce a less biased estimate of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>.</p>
+<hr />
+<h2 id="results">6. Results</h2>
+<h3 id="naive-ols-estimate">6.1 Naive OLS Estimate</h3>
+<p>A simple OLS regression of <code>net_tfa</code> on <code>e401</code>
+(no controls) yields:</p>
+<ul>
+<li><strong>Naive ATE: $19,559</strong> (95% CI: [$16,790,
+$22,329])</li>
+</ul>
+<p>This estimate is substantially upward biased due to income
+confounding.</p>
+<h3 id="causal-dml-estimate">6.2 Causal DML Estimate</h3>
+<p>After applying DML with GBM nuisance models:</p>
+<ul>
+<li><strong>Causal ATE: $9,581</strong> (SE: $1,479, 95% CI: [$6,682,
+$12,481])</li>
+</ul>
+<p>Interpretation: 401(k) eligibility causally increases net household
+financial assets by $9,581, on average, after controlling for income,
+age, education, family size, and other observable confounders.</p>
+<h3 id="naive-vs.-causal-comparison">6.3 Naive vs. Causal
+Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Estimator</th>
+<th>ATE</th>
+<th>95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Naive OLS</td>
+<td>$19,559</td>
+<td>[$16,790, $22,329]</td>
+</tr>
+<tr>
+<td>DML (GBM nuisance)</td>
+<td>$9,581</td>
+<td>[$6,682, $12,481]</td>
+</tr>
+<tr>
+<td>DML (RF nuisance)</td>
+<td>$8,984</td>
+<td>[$6,408, $11,561]</td>
+</tr>
+</tbody>
+</table>
+<p>The difference between naive and causal estimates ($9,978) represents
+the income selection bias — savings differences that would exist between
+these households even in the absence of 401(k) access. The DML estimate
+removes this confound.</p>
+<hr />
+<h2 id="robustness-checks">7. Robustness Checks</h2>
+<p>To verify the causal estimate is not an artifact of the GBM
+specification, we re-estimate the DML model replacing GBM nuisance
+models with Random Forest regressors (100 trees,
+<code>max_features='sqrt'</code>).</p>
+<p><strong>Result:</strong> The RF nuisance model yields an ATE of
+<strong>$8,984</strong> (95% CI: [$6,408, $11,561]) — a difference of
+$597 from the GBM estimate, well within one standard error of either
+model. This stability across structurally different learners provides
+strong evidence that the causal estimate reflects a genuine signal
+rather than a modeling artifact.</p>
+<p>Additionally, a bias sensitivity analysis shows that the causal
+effect remains positive unless unobserved confounding accounts for more
+than approximately 75% of the total DML estimate — an implausibly large
+residual given that our observables explain substantial variation in
+both treatment and outcome.</p>
+<hr />
+<h2 id="policy-implications">8. Policy Implications</h2>
+<p>The causal ATE of $9,581 per household is economically and
+statistically significant. At 30% take-up among 50,000 newly eligible
+workers, this implies approximately $143.7 million in new aggregate
+retirement savings. Even at the lower bound of the 95% confidence
+interval ($6,682), the implied benefit-cost ratio exceeds 13-to-1
+relative to typical 401(k) plan administration costs of ~$500 per
+eligible employee.</p>
+<p><strong>Recommendation:</strong> Extend 401(k) eligibility to
+currently ineligible workers. The causal evidence supports a meaningful
+savings impact. We recommend a staggered rollout with pre-registered
+measurement — ideally exploiting variation in rollout timing across
+business units as a natural experiment — to validate the contemporary
+effect with more recent data.</p>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>Abadie, A. (2003). Semiparametric instrumental variable estimation
+of treatment response models. <em>Journal of Econometrics</em>, 113(2),
+231–263.</li>
+<li>Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen,
+C., Newey, W., &amp; Robins, J. (2018). Double/debiased machine learning
+for treatment and structural parameters. <em>The Econometrics
+Journal</em>, 21(1), C1–C68.</li>
+<li>Bach, P., Chernozhukov, V., Kurz, M. S., &amp; Spindler, M. (2022).
+DoubleML — An object-oriented implementation of double machine learning
+in Python. <em>Journal of Machine Learning Research</em>, 23(53),
+1–6.</li>
+</ul>
+</body>
+</html>

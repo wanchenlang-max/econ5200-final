@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Wanchen Lang | lang.w@northeastern.edu" />
+  <title>Executive Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Executive Summary</h1>
+<p class="author">Wanchen Lang | lang.w@northeastern.edu</p>
+<p class="date">Spring 2026 — ECON 5200</p>
+</header>
+<h2 id="part-1-executive-summary">Part 1: Executive Summary</h2>
+<blockquote>
+<p><strong>We estimate that 401(k) plan eligibility increases net
+household financial assets by $9,581 (95% CI: [$6,682,
+$12,481]).</strong></p>
+<p><strong>Situation:</strong> US households face a widening retirement
+savings gap. Employer-sponsored 401(k) plans are the dominant
+accumulation vehicle for middle-income families, but coverage is uneven:
+roughly 60% of full-time private-sector workers have access, and
+part-time, seasonal, and gig workers are largely excluded. A financial
+services firm is evaluating whether extending 401(k) eligibility to its
+50,000 part-time employees will meaningfully increase their retirement
+savings — or merely reshuffle existing wealth into a new account
+wrapper.</p>
+<p><strong>Complication:</strong> Naive comparisons show a $19,559 gap
+in net financial assets between households with and without 401(k)
+access — but this is severely confounded by income selection. Workers at
+firms offering 401(k) plans earn $15,368 more per year on average. Any
+simple comparison picks up the “high-quality employer” bundle, not the
+causal effect of eligibility itself.</p>
+<p><strong>Resolution:</strong> We apply Double Machine Learning
+(Chernozhukov et al., 2018) to 9,915 households from the Survey of
+Income and Program Participation (SIPP). DML uses gradient-boosted trees
+to nonparametrically partial out income, age, education, family
+structure, and savings behavior from both outcome and treatment, then
+estimates the residual causal relationship. The resulting ATE of $9,581
+is roughly half the naive figure — confirming substantial selection bias
+— but remains economically large and precisely estimated.</p>
+<p><strong>We recommend that the client extend 401(k) eligibility to
+currently ineligible workers.</strong> At 30% take-up among 50,000 newly
+eligible employees, this implies approximately $143.7 million in new
+aggregate retirement savings — a compelling return on plan
+administration costs of roughly $25 million per year.</p>
+<p><strong>Key assumption that could invalidate this:</strong>
+Conditional independence — that after controlling for income, age,
+education, family size, marital status, IRA participation, and
+homeownership, which employer offers 401(k) access is effectively
+unrelated to unobserved savings preferences.</p>
+</blockquote>
+</body>
+</html>

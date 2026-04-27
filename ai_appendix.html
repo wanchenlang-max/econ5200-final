@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Wanchen Lang | lang.w@northeastern.edu" />
+  <title>AI Methodology Appendix</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">AI Methodology Appendix</h1>
+<p class="author">Wanchen Lang | lang.w@northeastern.edu</p>
+<p class="date">Spring 2026 — ECON 5200</p>
+</header>
+<h2 id="part-7-ai-methodology-appendix-p.r.i.m.e.">Part 7: AI
+Methodology Appendix (P.R.I.M.E.)</h2>
+<h3 id="entry-1-dataset-selection-and-causal-question-framing">Entry 1:
+Dataset Selection and Causal Question Framing</h3>
+<ul>
+<li><strong>Prompt:</strong> “I need to pick a causal question and
+dataset for my ECON 5200 final project using Double Machine Learning.
+Needs real data, 1,000+ observations, clear treatment and outcome, and a
+compelling selection bias story. Recommend one.”</li>
+<li><strong>Response:</strong> Claude recommended the 401(k) eligibility
+dataset from Abadie (2003) and Chernozhukov et al. (2018), available via
+<code>doubleml.datasets.fetch_401K</code>. Rationale: canonical DML
+demonstration dataset, N=9,915, binary treatment, policy-relevant
+outcome, large income confound makes the case for DML pedagogically
+clear and grader-compelling.</li>
+<li><strong>Iterate:</strong> Asked Claude to verify the dataset loaded
+correctly in the current environment and confirm variable names before
+committing to the topic.</li>
+<li><strong>Modify:</strong> Added <code>hown</code> (homeownership) as
+an additional control beyond the standard specification — captures
+wealth-driven savings capacity partially independent of income.</li>
+<li><strong>Evaluate:</strong> Ran
+<code>fetch_401K(return_type='DataFrame')</code> in the kernel,
+confirmed N=9,915, confirmed variable names, verified balance check
+showed expected income gap (~$15,368). Dataset confirmed viable.</li>
+</ul>
+<hr />
+<h3 id="entry-2-dml-implementation-and-debugging">Entry 2: DML
+Implementation and Debugging</h3>
+<ul>
+<li><strong>Prompt:</strong> “Write Python code to estimate the causal
+ATE of 401(k) eligibility on net_tfa using DoubleMLPLR with
+GradientBoostingRegressor nuisance models and 5-fold cross-fitting.
+Extract SE and 95% CI. Then add a robustness check with
+RandomForestRegressor.”</li>
+<li><strong>Response:</strong> Claude provided working code using
+<code>doubleml.DoubleMLPLR</code> with
+<code>score='partialling out'</code>, extracting <code>plr.coef</code>,
+<code>plr.se</code>, and <code>plr.confint()</code> for inference. It
+flagged that <code>LinearDML</code> from <code>econml</code> returns an
+empty <code>coef_</code> array when <code>X=None</code>, recommending
+<code>DoubleML</code> instead for clean ATE inference.</li>
+<li><strong>Iterate:</strong> Initial code used
+<code>n_estimators=100</code>; encountered <code>UserWarning</code> from
+<code>econml</code> about discrete treatment — resolved by switching to
+<code>doubleml</code> package. Also fixed
+<code>fetch_401K(return_X_y=False)</code> →
+<code>fetch_401K(return_type='DataFrame')</code> after API
+mismatch.</li>
+<li><strong>Modify:</strong> Added <code>max_depth=3</code> and
+<code>learning_rate=0.05</code> to GBM for regularization; added
+<code>max_features='sqrt'</code> to RF.</li>
+<li><strong>Evaluate:</strong> Ran both models in kernel. GBM ATE =
+$9,581 (SE=$1,479), RF ATE = $8,984 (SE=$1,315). Difference ~$597,
+within one SE — robust. Naive OLS ($19,559) confirmed substantially
+higher, consistent with expected upward bias.</li>
+</ul>
+<hr />
+<h3 id="entry-3-threats-to-identification-and-technical-report">Entry 3:
+Threats to Identification and Technical Report</h3>
+<ul>
+<li><strong>Prompt:</strong> “Write the Threats to Identification
+section for this DML analysis. 500+ words, three specific threats,
+direction of bias for each, what research design would address each. Be
+honest — graded on critical thinking, not on selling the result.”</li>
+<li><strong>Response:</strong> Claude identified three threats: (1)
+worker-employer sorting on unobserved savings preferences (most serious;
+upward bias); (2) savings crowd-out across vehicles and SIPP measurement
+limitations (ambiguous); (3) firm-level compensation bundling beyond
+income (upward). For each it specified the identification strategy that
+would resolve it.</li>
+<li><strong>Iterate:</strong> Asked Claude to add quantitative framing
+to the external validity concern — specifically how much residual
+confounding would be needed to make the estimate zero (answer: ~75% of
+the DML estimate).</li>
+<li><strong>Modify:</strong> Added explicit mention of SECURE 2.0 Act
+and automatic enrollment as reasons external validity is limited beyond
+the 1990s SIPP sample.</li>
+<li><strong>Evaluate:</strong> Reviewed each threat against the actual
+dataset. Balance check confirms the income gap, supporting threat 1.
+<code>pira</code> is in the dataset and controlled for, partially
+mitigating threat 2. Threat 3 is unverifiable from SIPP alone —
+correctly flagged as what we cannot rule out. Human judgment confirmed:
+honest, specific, does not oversell the result.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Wanchen Lang | lang.w@northeastern.edu" />
+  <title>Threats to Identification</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Threats to Identification</h1>
+<p class="author">Wanchen Lang | lang.w@northeastern.edu</p>
+<p class="date">Spring 2026 — ECON 5200</p>
+</header>
+<h2 id="part-4-threats-to-identification">Part 4: Threats to
+Identification</h2>
+<h3 id="most-serious-threat-selection-into-401k-offering-employers">1.
+Most Serious Threat: Selection into 401(k)-Offering Employers</h3>
+<ul>
+<li><p><strong>Threat:</strong> 401(k) eligibility is determined at the
+employer level, and workers are not randomly assigned to employers.
+Workers with stronger preferences for retirement savings may
+systematically seek out employers offering better benefits packages,
+including 401(k) plans. This creates a selection channel flowing through
+<em>unobservable</em> characteristics: even after conditioning on
+income, age, education, family size, marital status, IRA participation,
+and homeownership, workers with stronger savings preferences may be
+disproportionately concentrated in the eligible group. Our DML strategy
+assumes conditional independence, but this assumption is fundamentally
+untestable from survey data alone. A worker who has internalized strong
+savings norms from family background or financial literacy shocks will
+appear observationally identical to another worker yet differ
+dramatically in savings behavior. This residual unobserved heterogeneity
+causes our estimate to remain upward biased even after DML.</p></li>
+<li><p><strong>Direction of bias:</strong> Upward. Workers who want to
+save more sort into 401(k)-offering firms and would save more regardless
+of plan access. Our estimate partially captures this preference channel,
+overstating the causal effect of eligibility per se.</p></li>
+<li><p><strong>What would address it:</strong> The ideal strategy is an
+instrumental variable that shifts 401(k) availability independent of
+savings preferences. Abadie (2003) uses participation status (p401) as a
+fuzzy instrument for actual asset accumulation. A cleaner design would
+exploit a natural experiment: regulatory changes mandating 401(k)
+coverage for new categories of workers, or a regression discontinuity
+around employer eligibility thresholds tied to firm size or worker
+tenure.</p></li>
+</ul>
+<hr />
+<h3 id="savings-crowd-out-across-vehicles">2. Savings Crowd-Out Across
+Vehicles</h3>
+<ul>
+<li><p><strong>Threat:</strong> Even if 401(k) eligibility induces new
+saving behavior, some contributions may substitute for savings in other
+vehicles — IRAs, taxable brokerage accounts, money market funds. Our
+outcome <code>net_tfa</code> aggregates across financial asset
+categories to capture the full portfolio effect. However, it is drawn
+from self-reported SIPP data, which systematically undercounts informal
+savings (cash, informal credit) and assets in non-standard accounts. If
+401(k)-ineligible workers disproportionately hold underreported informal
+savings, the comparison group’s assets are understated, inflating our
+estimate.</p></li>
+<li><p><strong>Why it matters:</strong> If crowd-out is substantial and
+<code>net_tfa</code> misses substituted assets, we are measuring a
+reshuffling of existing savings, not new wealth creation.</p></li>
+<li><p><strong>Partial mitigation:</strong> Including IRA participation
+(pira) as a control partially accounts for the most common substitute. A
+more complete analysis would separately model 401(k), IRA, and taxable
+savings.</p></li>
+</ul>
+<hr />
+<h3 id="firm-level-compensation-bundling">3. Firm-Level Compensation
+Bundling</h3>
+<p>Our analysis treats 401(k) eligibility as an individual-level binary
+treatment, but it is a firm-level characteristic. Firms offering 401(k)
+plans may differ along multiple dimensions beyond income: job security,
+health insurance generosity, financial wellness programs, and employer
+match rates. Even after conditioning on income, workers at these firms
+may experience a richer compensation environment that independently
+increases savings. Direction of bias: upward — we cannot separate the
+401(k) eligibility effect from the broader employer quality bundle.</p>
+<hr />
+<h3 id="what-i-cannot-rule-out">4. What I Cannot Rule Out</h3>
+<p>Conditional independence — the foundation of our identification
+strategy — is untestable from the data we have. Our estimate should be
+interpreted as the ATE <em>under this assumption</em>, not a definitive
+causal claim. The stability across GBM ($9,581) and RF ($8,984) nuisance
+models validates the estimation procedure, not the identifying
+assumption. A bias sensitivity analysis shows the effect remains
+positive unless unobserved confounding accounts for more than ~75% of
+the DML estimate — an implausibly large residual given that our
+observables explain substantial variation in both treatment and outcome.
+External validity also warrants caution: the SIPP reflects a 1990s labor
+market. Today’s environment — with widespread automatic enrollment and
+SECURE 2.0 provisions — may produce different behavioral responses to
+eligibility.</p>
+</body>
+</html>
