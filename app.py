@@ -149,5 +149,28 @@ fig3.update_layout(
 )
 st.plotly_chart(fig3, use_container_width=True)
 
+# --- Counterfactual: treatment intensity doubled ---
+st.divider()
+st.subheader("Counterfactual: What if 401(k) eligibility expanded to twice as many workers?")
+
+doubled_eligible = n_eligible * 2
+doubled_impact   = adj_ate * doubled_eligible * takeup_rate
+doubled_lower    = max(0, ci_lower * doubled_eligible * takeup_rate)
+doubled_upper    = ci_upper * doubled_eligible * takeup_rate
+
+col_a, col_b, col_c = st.columns(3)
+col_a.metric("Workers Eligible (2×)", f"{doubled_eligible:,}", delta=f"+{n_eligible:,} vs. baseline")
+col_b.metric("ATE per household", f"${adj_ate:,.0f}", delta="unchanged")
+col_c.metric("Aggregate Impact (2×)", f"${doubled_impact/1e6:.1f}M",
+             delta=f"95% CI: [${doubled_lower/1e6:.1f}M, ${doubled_upper/1e6:.1f}M]")
+
+st.info(
+    f"**Counterfactual:** If the policy scale doubled — reaching {doubled_eligible:,} workers "
+    f"instead of {n_eligible:,} — and {takeup_rate_pct}% participate, the estimated aggregate "
+    f"increase in household net financial assets would be **${doubled_impact/1e6:.1f}M** "
+    f"(95% CI: [${doubled_lower/1e6:.1f}M, ${doubled_upper/1e6:.1f}M]). "
+    f"The per-household causal effect (${adj_ate:,.0f}) is unchanged — only the scale of deployment changes."
+)
+
 st.caption("Data: SIPP via DoubleML | Method: Partially Linear Regression DML | "
-           "Chernozhukov et al. (2018) | ECON 5200 Final Project")
+           "Chernozhukov et al. (2018) | ECON 5200 Final Project — Julian Lechner")
